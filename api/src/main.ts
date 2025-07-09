@@ -2,6 +2,15 @@ import express from "express";
 import { PrismaClient } from "./generated/prisma";
 import { errorHandler } from "./infrastructure/web/middleware/errorHandler";
 import { requestLogger } from "./infrastructure/web/middleware/requestLogger";
+import { PrismaPostRepository } from "./infrastructure/repositories/PrismaPostRepository";
+import { CreatePostUseCase } from "./core/usecases/CreatePostUseCase";
+import { PostController } from "./infrastructure/web/controllers/PostController";
+import { JwtAuthService } from "./infrastructure/services/JwtAuthService";
+import { PrismaUserRepository } from "./infrastructure/repositories/PrismaUserRepository";
+import { RegisterUseCase } from "./core/usecases/RegisterUseCase";
+import { LoginUseCase } from "./core/usecases/LoginUseCase";
+import { AuthController } from "./infrastructure/web/controllers/AuthController";
+import { authMiddleware } from "./infrastructure/web/middleware/authMiddleware";
 
 // Initial setup
 const app = express();
@@ -10,6 +19,30 @@ const prisma = new PrismaClient();
 // Middlewares
 app.use(express.json());
 app.use(requestLogger);
+
+// Dependency Injection
+const postRepository = new PrismaPostRepository(prisma);
+const createPostUseCase = new CreatePostUseCase(postRepository);
+
+// JWT Setup
+const authService = new JwtAuthService(process.env.JWT_SECRET!);
+const userRepository = new PrismaUserRepository(prisma);
+const registerUseCase = new RegisterUseCase(userRepository);
+const loginUseCase = new LoginUseCase(userRepository, authService);
+
+// Routes
+const authController = new AuthController(loginUseCase, registerUseCase);
+app.post("/auth/register", (req, res) => authController.register(req, res));
+app.post("/auth/login", (req, res) => authController.login(req, res));
+
+const postController = new PostController(createPostUseCase);
+app.post("/posts", (req, res) => postController.create(req, res));
+
+// const protectedRouter = express.Router();
+// protectedRouter.use(authMiddleware(authService));
+// protectedRouter.post("/post", (req, res) => postController.create(req, res));
+
+// app.use(protectedRouter);
 
 // Error Handler Middleware
 app.use(errorHandler);
