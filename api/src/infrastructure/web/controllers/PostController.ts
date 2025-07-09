@@ -8,7 +8,12 @@ export class PostController {
 
   async create(req: Request, res: Response) {
     try {
-      const dto = new CreatePostRequest(req.body.title, req.body.content);
+      const dto = new CreatePostRequest(
+        req.body.title,
+        req.body.content,
+        1,
+        req.body.published ?? false
+      );
       const post = await this.createPostUseCase.execute(
         PostMapper.toDomain(dto)
       );

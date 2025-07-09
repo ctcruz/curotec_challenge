@@ -2,6 +2,7 @@ export class CreatePostRequest {
   constructor(
     public readonly title: string,
     public readonly content: string,
+    public readonly authorId: number,
     public readonly published?: boolean
   ) {}
 

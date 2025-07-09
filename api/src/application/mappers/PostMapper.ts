@@ -9,6 +9,7 @@ export class PostMapper {
       title: dto.title,
       content: dto.content,
       published: dto.published || false,
+      authorId: dto.authorId,
     };
   }
 
@@ -19,6 +20,7 @@ export class PostMapper {
       post.title,
       post.content,
       post.published,
+      post.authorId,
       post.createdAt!
     );
   }
