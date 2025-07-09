@@ -13,6 +13,7 @@ import { AuthController } from "./infrastructure/web/controllers/AuthController"
 import { authMiddleware } from "./infrastructure/web/middleware/authMiddleware";
 import { UpdatePostUseCase } from "./core/usecases/UpdatePostUseCase";
 import { DeletePostUseCase } from "./core/usecases/DeletePostUseCase";
+import { FindPostUseCase } from "./core/usecases/FindPostUseCase";
 
 // Initial setup
 const app = express();
@@ -27,6 +28,7 @@ const postRepository = new PrismaPostRepository(prisma);
 const createPostUseCase = new CreatePostUseCase(postRepository);
 const updatePostUseCase = new UpdatePostUseCase(postRepository);
 const deletePostUseCase = new DeletePostUseCase(postRepository);
+const findPostUseCase = new FindPostUseCase(postRepository);
 
 // JWT Setup
 const authService = new JwtAuthService(process.env.JWT_SECRET!);
@@ -42,11 +44,13 @@ app.post("/auth/login", (req, res) => authController.login(req, res));
 const postController = new PostController(
   createPostUseCase,
   updatePostUseCase,
-  deletePostUseCase
+  deletePostUseCase,
+  findPostUseCase
 );
 app.post("/post", (req, res) => postController.create(req, res));
 app.patch("/post/:id", (req, res) => postController.update(req, res));
 app.delete("/post/:id", (req, res) => postController.delete(req, res));
+app.get("/post/:id", (req, res) => postController.find(req, res));
 
 // const protectedRouter = express.Router();
 // protectedRouter.use(authMiddleware(authService));

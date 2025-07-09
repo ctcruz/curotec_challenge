@@ -7,12 +7,14 @@ import { UpdatePostRequest } from "../../../application/dto/requests/UpdatePostR
 import { UpdatePostUseCase } from "../../../core/usecases/UpdatePostUseCase";
 import { DeletePostRequest } from "../../../application/dto/requests/DeletePostRequest.dto";
 import { DeletePostUseCase } from "../../../core/usecases/DeletePostUseCase";
+import { FindPostUseCase } from "../../../core/usecases/FindPostUseCase";
 
 export class PostController {
   constructor(
     private readonly createPostUseCase: CreatePostUseCase,
     private readonly updatePostUseCase: UpdatePostUseCase,
-    private readonly deletePostUseCase: DeletePostUseCase
+    private readonly deletePostUseCase: DeletePostUseCase,
+    private readonly findPostUseCase: FindPostUseCase
   ) {}
 
   async create(req: Request, res: Response) {
@@ -84,6 +86,25 @@ export class PostController {
       await this.deletePostUseCase.execute(postId);
 
       res.status(201).json({ message: "Post deleted successfully" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      res.status(400).json({ error: message });
+    }
+  }
+
+  async find(req: Request, res: Response) {
+    try {
+      const postId = parseInt(req.params.id, 10);
+
+      const post = await this.findPostUseCase.execute(postId);
+
+      if (post === null) {
+        res.status(404).json({ error: "Post not found" });
+        return;
+      }
+
+      const response = PostMapper.toResponse(post);
+      res.status(201).json(response);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       res.status(400).json({ error: message });
