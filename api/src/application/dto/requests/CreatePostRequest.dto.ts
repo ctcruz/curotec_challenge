@@ -1,12 +1,32 @@
-export class CreatePostRequest {
-  constructor(
-    public readonly title: string,
-    public readonly content: string,
-    public readonly authorId: number,
-    public readonly published?: boolean
-  ) {}
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsInt,
+  IsNotEmpty,
+} from "class-validator";
 
-  static validate(data: any): data is CreatePostRequest {
-    return data.title && typeof data.title === "string";
+export class CreatePostRequest {
+  @IsString()
+  @IsNotEmpty({ message: "Title is required" })
+  title: string;
+
+  @IsString()
+  @IsNotEmpty()
+  content: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  authorId: number;
+
+  @IsOptional()
+  @IsBoolean()
+  published?: boolean;
+
+  constructor(data: CreatePostRequest) {
+    this.title = data.title;
+    this.content = data.content;
+    this.authorId = data.authorId;
+    this.published = data.published;
   }
 }

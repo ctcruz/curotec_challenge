@@ -7,8 +7,6 @@ export class CreatePostUseCase {
   async execute(
     postData: Omit<Post, "id" | "createdAt" | "updatedAt">
   ): Promise<Post> {
-    if (!postData.title) throw new Error("Title is required");
-
     return this.postRepo.create(postData);
   }
 }
