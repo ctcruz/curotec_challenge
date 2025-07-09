@@ -23,6 +23,11 @@ export class AuthController {
     try {
       const { name, email, password } = req.body;
       const user = await this.registerUseCase.execute(name, email, password);
+      res.status(201).json({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       res.status(400).json({ error: message });
