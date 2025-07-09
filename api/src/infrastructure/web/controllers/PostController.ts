@@ -5,11 +5,14 @@ import { CreatePostUseCase } from "../../../core/usecases/CreatePostUseCase";
 import { validate } from "class-validator";
 import { UpdatePostRequest } from "../../../application/dto/requests/UpdatePostRequest.dto";
 import { UpdatePostUseCase } from "../../../core/usecases/UpdatePostUseCase";
+import { DeletePostRequest } from "../../../application/dto/requests/DeletePostRequest.dto";
+import { DeletePostUseCase } from "../../../core/usecases/DeletePostUseCase";
 
 export class PostController {
   constructor(
     private readonly createPostUseCase: CreatePostUseCase,
-    private readonly updatePostUseCase: UpdatePostUseCase
+    private readonly updatePostUseCase: UpdatePostUseCase,
+    private readonly deletePostUseCase: DeletePostUseCase
   ) {}
 
   async create(req: Request, res: Response) {
@@ -68,6 +71,19 @@ export class PostController {
 
       const response = PostMapper.toResponse(post);
       res.status(201).json(response);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      res.status(400).json({ error: message });
+    }
+  }
+
+  async delete(req: Request, res: Response) {
+    try {
+      const postId = parseInt(req.params.id, 10);
+
+      await this.deletePostUseCase.execute(postId);
+
+      res.status(201).json({ message: "Post deleted successfully" });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       res.status(400).json({ error: message });
