@@ -33,17 +33,16 @@ export class PostController {
     const dto = new UpdatePostRequest(req.body);
     await validateOrReject(dto);
 
-    const post = await this.updatePostUseCase.execute(postId, dto);
+    await this.updatePostUseCase.execute(postId, dto);
 
-    const response = PostMapper.toResponse(post);
-    res.status(201).json(response);
+    res.status(204);
   }
 
   async delete(req: Request, res: Response) {
     const postId = parseInt(req.params.id, 10);
     await this.deletePostUseCase.execute(postId);
 
-    res.status(201).json({ message: "Post deleted successfully" });
+    res.status(204);
   }
 
   async find(req: Request, res: Response) {
@@ -56,13 +55,13 @@ export class PostController {
     }
 
     const response = PostMapper.toResponse(post);
-    res.status(201).json(response);
+    res.status(200).json(response);
   }
 
   async findAll(req: Request, res: Response) {
     const posts = await this.findAllPostUseCase.execute();
 
     const response = posts.map(PostMapper.toResponse);
-    res.status(201).json(response);
+    res.status(200).json(response);
   }
 }

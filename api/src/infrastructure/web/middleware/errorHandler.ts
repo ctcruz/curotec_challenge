@@ -16,16 +16,6 @@ export function errorHandler(
     return;
   }
 
-  // // Tratamento para erros de validação (class-validator)
-  // if (err.name === "ValidationError") {
-  //   // Exemplo para erros do class-validator
-  //   res.status(422).json({
-  //     error: "Validation error",
-  //     details: err,
-  //   });
-  //   return;
-  // }
-
   if (Array.isArray(err) && err[0]?.constraints) {
     // Erros do class-validator
     res.status(422).json({
