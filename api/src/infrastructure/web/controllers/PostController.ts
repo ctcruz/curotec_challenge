@@ -3,9 +3,14 @@ import { CreatePostRequest } from "../../../application/dto/requests/CreatePostR
 import { PostMapper } from "../../../application/mappers/PostMapper";
 import { CreatePostUseCase } from "../../../core/usecases/CreatePostUseCase";
 import { validate } from "class-validator";
+import { UpdatePostRequest } from "../../../application/dto/requests/UpdatePostRequest.dto";
+import { UpdatePostUseCase } from "../../../core/usecases/UpdatePostUseCase";
 
 export class PostController {
-  constructor(private readonly createPostUseCase: CreatePostUseCase) {}
+  constructor(
+    private readonly createPostUseCase: CreatePostUseCase,
+    private readonly updatePostUseCase: UpdatePostUseCase
+  ) {}
 
   async create(req: Request, res: Response) {
     try {
@@ -32,6 +37,35 @@ export class PostController {
       const post = await this.createPostUseCase.execute(
         PostMapper.toDomain(dto)
       );
+
+      const response = PostMapper.toResponse(post);
+      res.status(201).json(response);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      res.status(400).json({ error: message });
+    }
+  }
+
+  async update(req: Request, res: Response) {
+    try {
+      const postId = parseInt(req.params.id, 10);
+      const dto = new UpdatePostRequest(req.body);
+
+      const errors = await validate(dto, {
+        stopAtFirstError: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        forbidUnknownValues: true,
+        validationError: { target: false, value: false },
+      });
+
+      if (errors.length > 0) {
+        res.status(400).json({ errors });
+        return;
+      }
+
+      const post = await this.updatePostUseCase.execute(postId, dto);
+
       const response = PostMapper.toResponse(post);
       res.status(201).json(response);
     } catch (error) {

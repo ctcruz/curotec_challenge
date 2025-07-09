@@ -11,6 +11,7 @@ import { RegisterUseCase } from "./core/usecases/RegisterUseCase";
 import { LoginUseCase } from "./core/usecases/LoginUseCase";
 import { AuthController } from "./infrastructure/web/controllers/AuthController";
 import { authMiddleware } from "./infrastructure/web/middleware/authMiddleware";
+import { UpdatePostUseCase } from "./core/usecases/UpdatePostUseCase";
 
 // Initial setup
 const app = express();
@@ -23,6 +24,7 @@ app.use(requestLogger);
 // Dependency Injection
 const postRepository = new PrismaPostRepository(prisma);
 const createPostUseCase = new CreatePostUseCase(postRepository);
+const updatePostUseCase = new UpdatePostUseCase(postRepository);
 
 // JWT Setup
 const authService = new JwtAuthService(process.env.JWT_SECRET!);
@@ -35,8 +37,9 @@ const authController = new AuthController(loginUseCase, registerUseCase);
 app.post("/auth/register", (req, res) => authController.register(req, res));
 app.post("/auth/login", (req, res) => authController.login(req, res));
 
-const postController = new PostController(createPostUseCase);
-app.post("/posts", (req, res) => postController.create(req, res));
+const postController = new PostController(createPostUseCase, updatePostUseCase);
+app.post("/post", (req, res) => postController.create(req, res));
+app.patch("/post/:id", (req, res) => postController.update(req, res));
 
 // const protectedRouter = express.Router();
 // protectedRouter.use(authMiddleware(authService));
