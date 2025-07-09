@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { CreatePostRequest } from "../../../application/dto/requests/CreatePostRequest.dto";
 import { PostMapper } from "../../../application/mappers/PostMapper";
 import { CreatePostUseCase } from "../../../core/usecases/CreatePostUseCase";
@@ -18,76 +18,51 @@ export class PostController {
     private readonly findAllPostUseCase: FindAllPostUseCase
   ) {}
 
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const dto = new CreatePostRequest(req.body);
+  async create(req: Request, res: Response) {
+    const dto = new CreatePostRequest(req.body);
+    await validateOrReject(dto);
 
-      await validateOrReject(dto);
+    const post = await this.createPostUseCase.execute(PostMapper.toDomain(dto));
 
-      const post = await this.createPostUseCase.execute(
-        PostMapper.toDomain(dto)
-      );
-
-      const response = PostMapper.toResponse(post);
-      res.status(201).json(response);
-    } catch (error) {
-      next(error);
-    }
+    const response = PostMapper.toResponse(post);
+    res.status(201).json(response);
   }
 
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      const postId = parseInt(req.params.id, 10);
-      const dto = new UpdatePostRequest(req.body);
-      await validateOrReject(dto);
+  async update(req: Request, res: Response) {
+    const postId = parseInt(req.params.id, 10);
+    const dto = new UpdatePostRequest(req.body);
+    await validateOrReject(dto);
 
-      const post = await this.updatePostUseCase.execute(postId, dto);
+    const post = await this.updatePostUseCase.execute(postId, dto);
 
-      const response = PostMapper.toResponse(post);
-      res.status(201).json(response);
-    } catch (error) {
-      next(error);
-    }
+    const response = PostMapper.toResponse(post);
+    res.status(201).json(response);
   }
 
-  async delete(req: Request, res: Response, next: NextFunction) {
-    try {
-      const postId = parseInt(req.params.id, 10);
+  async delete(req: Request, res: Response) {
+    const postId = parseInt(req.params.id, 10);
+    await this.deletePostUseCase.execute(postId);
 
-      await this.deletePostUseCase.execute(postId);
-
-      res.status(201).json({ message: "Post deleted successfully" });
-    } catch (error) {
-      next(error);
-    }
+    res.status(201).json({ message: "Post deleted successfully" });
   }
 
-  async find(req: Request, res: Response, next: NextFunction) {
-    try {
-      const postId = parseInt(req.params.id, 10);
+  async find(req: Request, res: Response) {
+    const postId = parseInt(req.params.id, 10);
+    const post = await this.findPostUseCase.execute(postId);
 
-      const post = await this.findPostUseCase.execute(postId);
-
-      if (post === null) {
-        res.status(404).json({ error: "Post not found" });
-        return;
-      }
-
-      const response = PostMapper.toResponse(post);
-      res.status(201).json(response);
-    } catch (error) {
-      next(error);
+    if (post === null) {
+      res.status(404).json({ error: "Post not found" });
+      return;
     }
+
+    const response = PostMapper.toResponse(post);
+    res.status(201).json(response);
   }
 
-  async findAll(req: Request, res: Response, next: NextFunction) {
-    try {
-      const posts = await this.findAllPostUseCase.execute();
+  async findAll(req: Request, res: Response) {
+    const posts = await this.findAllPostUseCase.execute();
 
-      const response = posts.map(PostMapper.toResponse);
-      res.status(201).json(response);
-    } catch (error) {
-      next(error);
-    }
+    const response = posts.map(PostMapper.toResponse);
+    res.status(201).json(response);
   }
 }

@@ -16,6 +16,7 @@ import { UpdatePostUseCase } from "./core/usecases/UpdatePostUseCase";
 import { DeletePostUseCase } from "./core/usecases/DeletePostUseCase";
 import { FindPostUseCase } from "./core/usecases/FindPostUseCase";
 import { FindAllPostUseCase } from "./core/usecases/FindAllPostUseCase";
+import { asyncHandler } from "./infrastructure/web/utils/asyncHandler";
 
 // Initial setup
 const app = express();
@@ -56,20 +57,25 @@ const postController = new PostController(
 const protectedRouter = express.Router();
 protectedRouter.use(authMiddleware(authService));
 
-protectedRouter.post("/post", (req, res, next) =>
-  postController.create(req, res, next)
+protectedRouter.post(
+  "/post",
+  asyncHandler((req, res) => postController.create(req, res))
 );
-protectedRouter.patch("/post/:id", (req, res, next) =>
-  postController.update(req, res, next)
+protectedRouter.patch(
+  "/post/:id",
+  asyncHandler((req, res) => postController.update(req, res))
 );
-protectedRouter.delete("/post/:id", (req, res, next) =>
-  postController.delete(req, res, next)
+protectedRouter.delete(
+  "/post/:id",
+  asyncHandler((req, res) => postController.delete(req, res))
 );
-protectedRouter.get("/post/:id", (req, res, next) =>
-  postController.find(req, res, next)
+protectedRouter.get(
+  "/post/:id",
+  asyncHandler((req, res) => postController.find(req, res))
 );
-protectedRouter.get("/posts", (req, res, next) =>
-  postController.findAll(req, res, next)
+protectedRouter.get(
+  "/posts",
+  asyncHandler((req, res) => postController.findAll(req, res))
 );
 
 app.use(protectedRouter);
