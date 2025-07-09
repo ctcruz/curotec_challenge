@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { PrismaClient } from "./generated/prisma";
 import { errorHandler } from "./infrastructure/web/middleware/errorHandler";
 import { requestLogger } from "./infrastructure/web/middleware/requestLogger";
@@ -23,6 +24,7 @@ const prisma = new PrismaClient();
 // Middlewares
 app.use(express.json());
 app.use(requestLogger);
+app.use(cors());
 
 // Dependency Injection
 const postRepository = new PrismaPostRepository(prisma);
