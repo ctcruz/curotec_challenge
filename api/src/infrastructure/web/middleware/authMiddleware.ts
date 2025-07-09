@@ -12,12 +12,12 @@ export const authMiddleware = (authService: AuthService) => {
 
     try {
       const payload = authService.verifyToken(token);
+
       if (!payload || !payload.userId) {
         res.status(401).json({ error: "Token inválido" });
         return;
       }
 
-      req.userId = payload.userId;
       next();
     } catch (error) {
       res.status(401).json({ error: "Falha na autenticação" });

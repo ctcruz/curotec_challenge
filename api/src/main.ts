@@ -50,17 +50,21 @@ const postController = new PostController(
   findPostUseCase,
   findAllPostUseCase
 );
-app.post("/post", (req, res) => postController.create(req, res));
-app.patch("/post/:id", (req, res) => postController.update(req, res));
-app.delete("/post/:id", (req, res) => postController.delete(req, res));
-app.get("/post/:id", (req, res) => postController.find(req, res));
-app.get("/posts", (req, res) => postController.findAll(req, res));
 
-// const protectedRouter = express.Router();
-// protectedRouter.use(authMiddleware(authService));
-// protectedRouter.post("/post", (req, res) => postController.create(req, res));
+const protectedRouter = express.Router();
+protectedRouter.use(authMiddleware(authService));
 
-// app.use(protectedRouter);
+protectedRouter.post("/post", (req, res) => postController.create(req, res));
+protectedRouter.patch("/post/:id", (req, res) =>
+  postController.update(req, res)
+);
+protectedRouter.delete("/post/:id", (req, res) =>
+  postController.delete(req, res)
+);
+protectedRouter.get("/post/:id", (req, res) => postController.find(req, res));
+protectedRouter.get("/posts", (req, res) => postController.findAll(req, res));
+
+app.use(protectedRouter);
 
 // Error Handler Middleware
 app.use(errorHandler);

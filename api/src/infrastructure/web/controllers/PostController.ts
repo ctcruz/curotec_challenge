@@ -115,9 +115,7 @@ export class PostController {
 
   async findAll(req: Request, res: Response) {
     try {
-      const postId = parseInt(req.params.id, 10);
-
-      const posts = await this.findAllPostUseCase.execute(postId);
+      const posts = await this.findAllPostUseCase.execute();
 
       const response = posts.map(PostMapper.toResponse);
       res.status(201).json(response);
