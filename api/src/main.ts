@@ -14,6 +14,7 @@ import { authMiddleware } from "./infrastructure/web/middleware/authMiddleware";
 import { UpdatePostUseCase } from "./core/usecases/UpdatePostUseCase";
 import { DeletePostUseCase } from "./core/usecases/DeletePostUseCase";
 import { FindPostUseCase } from "./core/usecases/FindPostUseCase";
+import { FindAllPostUseCase } from "./core/usecases/FindAllPostUseCase";
 
 // Initial setup
 const app = express();
@@ -29,6 +30,7 @@ const createPostUseCase = new CreatePostUseCase(postRepository);
 const updatePostUseCase = new UpdatePostUseCase(postRepository);
 const deletePostUseCase = new DeletePostUseCase(postRepository);
 const findPostUseCase = new FindPostUseCase(postRepository);
+const findAllPostUseCase = new FindAllPostUseCase(postRepository);
 
 // JWT Setup
 const authService = new JwtAuthService(process.env.JWT_SECRET!);
@@ -45,12 +47,14 @@ const postController = new PostController(
   createPostUseCase,
   updatePostUseCase,
   deletePostUseCase,
-  findPostUseCase
+  findPostUseCase,
+  findAllPostUseCase
 );
 app.post("/post", (req, res) => postController.create(req, res));
 app.patch("/post/:id", (req, res) => postController.update(req, res));
 app.delete("/post/:id", (req, res) => postController.delete(req, res));
 app.get("/post/:id", (req, res) => postController.find(req, res));
+app.get("/posts", (req, res) => postController.findAll(req, res));
 
 // const protectedRouter = express.Router();
 // protectedRouter.use(authMiddleware(authService));
