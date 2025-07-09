@@ -1,11 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { CreatePostRequest } from "../../../application/dto/requests/CreatePostRequest.dto";
 import { PostMapper } from "../../../application/mappers/PostMapper";
 import { CreatePostUseCase } from "../../../core/usecases/CreatePostUseCase";
-import { validate } from "class-validator";
+import { validateOrReject } from "class-validator";
 import { UpdatePostRequest } from "../../../application/dto/requests/UpdatePostRequest.dto";
 import { UpdatePostUseCase } from "../../../core/usecases/UpdatePostUseCase";
-import { DeletePostRequest } from "../../../application/dto/requests/DeletePostRequest.dto";
 import { DeletePostUseCase } from "../../../core/usecases/DeletePostUseCase";
 import { FindPostUseCase } from "../../../core/usecases/FindPostUseCase";
 import { FindAllPostUseCase } from "../../../core/usecases/FindAllPostUseCase";
@@ -19,27 +18,11 @@ export class PostController {
     private readonly findAllPostUseCase: FindAllPostUseCase
   ) {}
 
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const dto = new CreatePostRequest({
-        title: req.body.title,
-        content: req.body.content,
-        authorId: req.body.authorId,
-        published: req.body.published,
-      });
+      const dto = new CreatePostRequest(req.body);
 
-      const errors = await validate(dto, {
-        stopAtFirstError: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        forbidUnknownValues: true,
-        validationError: { target: false, value: false },
-      });
-
-      if (errors.length > 0) {
-        res.status(400).json({ errors });
-        return;
-      }
+      await validateOrReject(dto);
 
       const post = await this.createPostUseCase.execute(
         PostMapper.toDomain(dto)
@@ -48,40 +31,26 @@ export class PostController {
       const response = PostMapper.toResponse(post);
       res.status(201).json(response);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      res.status(400).json({ error: message });
+      next(error);
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: Request, res: Response, next: NextFunction) {
     try {
       const postId = parseInt(req.params.id, 10);
       const dto = new UpdatePostRequest(req.body);
-
-      const errors = await validate(dto, {
-        stopAtFirstError: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        forbidUnknownValues: true,
-        validationError: { target: false, value: false },
-      });
-
-      if (errors.length > 0) {
-        res.status(400).json({ errors });
-        return;
-      }
+      await validateOrReject(dto);
 
       const post = await this.updatePostUseCase.execute(postId, dto);
 
       const response = PostMapper.toResponse(post);
       res.status(201).json(response);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      res.status(400).json({ error: message });
+      next(error);
     }
   }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const postId = parseInt(req.params.id, 10);
 
@@ -89,12 +58,11 @@ export class PostController {
 
       res.status(201).json({ message: "Post deleted successfully" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      res.status(400).json({ error: message });
+      next(error);
     }
   }
 
-  async find(req: Request, res: Response) {
+  async find(req: Request, res: Response, next: NextFunction) {
     try {
       const postId = parseInt(req.params.id, 10);
 
@@ -108,20 +76,18 @@ export class PostController {
       const response = PostMapper.toResponse(post);
       res.status(201).json(response);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      res.status(400).json({ error: message });
+      next(error);
     }
   }
 
-  async findAll(req: Request, res: Response) {
+  async findAll(req: Request, res: Response, next: NextFunction) {
     try {
       const posts = await this.findAllPostUseCase.execute();
 
       const response = posts.map(PostMapper.toResponse);
       res.status(201).json(response);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      res.status(400).json({ error: message });
+      next(error);
     }
   }
 }

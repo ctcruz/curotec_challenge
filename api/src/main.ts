@@ -56,15 +56,21 @@ const postController = new PostController(
 const protectedRouter = express.Router();
 protectedRouter.use(authMiddleware(authService));
 
-protectedRouter.post("/post", (req, res) => postController.create(req, res));
-protectedRouter.patch("/post/:id", (req, res) =>
-  postController.update(req, res)
+protectedRouter.post("/post", (req, res, next) =>
+  postController.create(req, res, next)
 );
-protectedRouter.delete("/post/:id", (req, res) =>
-  postController.delete(req, res)
+protectedRouter.patch("/post/:id", (req, res, next) =>
+  postController.update(req, res, next)
 );
-protectedRouter.get("/post/:id", (req, res) => postController.find(req, res));
-protectedRouter.get("/posts", (req, res) => postController.findAll(req, res));
+protectedRouter.delete("/post/:id", (req, res, next) =>
+  postController.delete(req, res, next)
+);
+protectedRouter.get("/post/:id", (req, res, next) =>
+  postController.find(req, res, next)
+);
+protectedRouter.get("/posts", (req, res, next) =>
+  postController.findAll(req, res, next)
+);
 
 app.use(protectedRouter);
 
