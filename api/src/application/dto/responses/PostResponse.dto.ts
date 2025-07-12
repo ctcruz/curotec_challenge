@@ -1,3 +1,21 @@
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     PostResponse:
+ *       type: object
+ *       properties:
+ *         title:
+ *           type: string
+ *           minLength: 5
+ *           example: "Meu primeiro post"
+ *         content:
+ *           type: string
+ *           example: "Conteúdo do post"
+ *         published:
+ *           type: boolean
+ *           default: false
+ */
 export class PostResponse {
   constructor(
     public readonly id: number,
