@@ -1,6 +1,6 @@
 import { PostRepository } from "../../core/interfaces/repositories/PostRepository";
 import { Post } from "../../core/entities/post.entity";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma";
 
 export class PrismaPostRepository implements PostRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -16,8 +16,8 @@ export class PrismaPostRepository implements PostRepository {
     });
   }
 
-  delete(id: number): Promise<void> {
-    return this.prisma.post.delete({ where: { id } });
+  async delete(id: number): Promise<void> {
+    this.prisma.post.delete({ where: { id } });
   }
 
   async create(post: Omit<Post, "id">): Promise<Post> {
