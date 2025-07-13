@@ -19,10 +19,16 @@ export class PostController {
   ) {}
 
   async create(req: Request, res: Response) {
-    const dto = new CreatePostRequest(req.body);
-    await validateOrReject(dto);
+    const userId = (req as any).userId;
+    const createPostRequest = new CreatePostRequest({
+      ...req.body,
+      authorId: userId,
+    });
+    await validateOrReject(createPostRequest);
 
-    const post = await this.createPostUseCase.execute(PostMapper.toDomain(dto));
+    const post = await this.createPostUseCase.execute(
+      PostMapper.toDomain(createPostRequest)
+    );
 
     const response = PostMapper.toResponse(post);
     return res.status(201).json(response);

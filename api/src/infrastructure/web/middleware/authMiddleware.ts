@@ -18,6 +18,7 @@ export const authMiddleware = (authService: AuthService) => {
         return;
       }
 
+      (req as any).userId = payload.userId;
       next();
     } catch (error) {
       res.status(401).json({ error: "Falha na autenticação" });
