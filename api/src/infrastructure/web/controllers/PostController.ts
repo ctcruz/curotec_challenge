@@ -25,7 +25,7 @@ export class PostController {
     const post = await this.createPostUseCase.execute(PostMapper.toDomain(dto));
 
     const response = PostMapper.toResponse(post);
-    res.status(201).json(response);
+    return res.status(201).json(response);
   }
 
   async update(req: Request, res: Response) {

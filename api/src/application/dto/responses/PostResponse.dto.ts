@@ -7,7 +7,6 @@
  *       properties:
  *         title:
  *           type: string
- *           minLength: 5
  *           example: "My first post"
  *         content:
  *           type: string

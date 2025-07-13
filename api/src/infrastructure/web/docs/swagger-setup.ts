@@ -1,13 +1,12 @@
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import swaggerAutogen from "swagger-autogen";
 import { Express } from "express";
 
-const options = {
+const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Curotec API",
+      title: "Curotec AsPI",
       version: "1.0.0",
       description: "Curotec API Documentation",
     },
@@ -20,19 +19,27 @@ const options = {
         },
       },
     },
+    tags: [
+      {
+        name: "Posts",
+        description: "Operations related to posts",
+      },
+      {
+        name: "Auth",
+        description: "Operations related to user authentication",
+      },
+    ],
   },
   apis: [
     "./src/infrastructure/web/routes/*.ts",
     "./src/application/dto/**/*.ts",
   ],
 };
-const outputFile = "./src/infrastructure/web/docs/swagger-output.json";
 
 export const setupSwagger = (app: Express) => {
   const specs = swaggerJsdoc(options);
-  swaggerAutogen(outputFile, options.apis, options);
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-  app.get("/swagger-output.json", (req, res) => {
-    res.sendFile("./swagger-output.json", { root: __dirname });
+  app.get("/api-json", (req, res) => {
+    res.send(specs);
   });
 };

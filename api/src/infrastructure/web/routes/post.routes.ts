@@ -41,6 +41,8 @@ router.use(authMiddleware(authService));
  *   post:
  *     summary: Create a new post
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -55,24 +57,26 @@ router.use(authMiddleware(authService));
  *             schema:
  *               $ref: '#/components/schemas/PostResponse'
  *       400:
- *         description: Validation error
+ *         description: Invalid input
  */
 router.post(
-  "/",
+  "/posts",
   asyncHandler((req, res) => postController.create(req, res))
 );
 
 /**
  * @swagger
  * /posts/{id}:
- *   put:
- *     summary: Update a post
+ *   patch:
+ *     summary: Update a post by ID
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: Post ID
  *     requestBody:
@@ -82,15 +86,17 @@ router.post(
  *           schema:
  *             $ref: '#/components/schemas/UpdatePostRequest'
  *     responses:
- *       204:
- *         description: Post updated successfully
- *       400:
- *         description: Validation error
+ *       200:
+ *         description: Post updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PostResponse'
  *       404:
  *         description: Post not found
  */
 router.patch(
-  "/:id",
+  "/posts/:id",
   asyncHandler((req, res) => postController.update(req, res))
 );
 
@@ -98,23 +104,25 @@ router.patch(
  * @swagger
  * /posts/{id}:
  *   delete:
- *     summary: Delete a post
+ *     summary: Delete a post by ID
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: Post ID
  *     responses:
  *       204:
- *         description: Post deleted successfully
+ *         description: Post deleted
  *       404:
  *         description: Post not found
  */
 router.delete(
-  "/:id",
+  "/posts/:id",
   asyncHandler((req, res) => postController.delete(req, res))
 );
 
@@ -124,11 +132,13 @@ router.delete(
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: Post ID
  *     responses:
@@ -142,7 +152,7 @@ router.delete(
  *         description: Post not found
  */
 router.get(
-  "/:id",
+  "/posts/:id",
   asyncHandler((req, res) => postController.find(req, res))
 );
 
@@ -152,6 +162,8 @@ router.get(
  *   get:
  *     summary: Get all posts
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of posts
@@ -163,7 +175,7 @@ router.get(
  *                 $ref: '#/components/schemas/PostResponse'
  */
 router.get(
-  "/",
+  "/posts",
   asyncHandler((req, res) => postController.findAll(req, res))
 );
 

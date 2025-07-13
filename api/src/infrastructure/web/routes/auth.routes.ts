@@ -18,7 +18,53 @@ const loginUseCase = new LoginUseCase(userRepository, authService);
 const router = Router();
 
 const authController = new AuthController(loginUseCase, registerUseCase);
-router.post("/register", (req, res) => authController.register(req, res));
-router.post("/login", (req, res) => authController.login(req, res));
+
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserResponse'
+ *       400:
+ *         description: Validation error
+ */
+router.post("/auth/register", (req, res) => authController.register(req, res));
+
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login an user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       401:
+ *         description: Unauthorized
+ */
+router.post("/auth/login", (req, res) => authController.login(req, res));
 
 export const authRouter = router;
