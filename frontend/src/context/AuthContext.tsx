@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { User } from "../types/auth";
 import { AuthContext } from "./useAuth";
+import { postAuthLogin } from "../api";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -12,10 +13,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  const login = async (username: string, password: string) => {
-    // Simulação de autenticação (substituir por API real)
-    if (username === "admin" && password === "123") {
-      const userData = { username };
+  const login = async (email: string, password: string) => {
+    const loginData = await postAuthLogin({ email, password });
+    const token = loginData.data;
+    console.log("token: ", token);
+    if (email === "admin" && password === "123") {
+      const userData = { email };
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
     } else {

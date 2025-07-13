@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+// import { useAuth } from "../context/useAuth";
 
 interface FormData {
   email: string;
@@ -7,7 +8,9 @@ interface FormData {
 }
 
 const Login = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  // const { login } = useAuth();
+
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -22,7 +25,7 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -32,11 +35,12 @@ const Login = () => {
       return;
     }
 
-    // Here you would typically call an authentication API
-    console.log("Login data:", formData);
-
-    // For demo purposes, just navigate to home on "success"
-    navigate("/");
+    // try {
+    //   await login(formData.email, formData.password);
+    //   navigate("/");
+    // } catch (err: any) {
+    //   setError(err.message);
+    // }
   };
 
   return (
