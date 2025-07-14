@@ -5,6 +5,8 @@
  *     PostResponse:
  *       type: object
  *       properties:
+ *         id:
+ *           type: number
  *         title:
  *           type: string
  *           example: "My first post"
@@ -13,7 +15,11 @@
  *           example: "This is the content of my first post."
  *         published:
  *           type: boolean
- *           default: false
+ *           default: true
+ *         authorId:
+ *           type: number
+ *         createdAt:
+ *           type: string
  */
 export class PostResponse {
   constructor(

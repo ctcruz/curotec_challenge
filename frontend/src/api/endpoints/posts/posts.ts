@@ -5,24 +5,25 @@
  * Curotec API Documentation
  * OpenAPI spec version: 1.0.0
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
   DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-
-import * as axios from "axios";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
   CreatePostRequest,
@@ -30,18 +31,35 @@ import type {
   UpdatePostRequest,
 } from "../../model";
 
+import postPostsMutator from "../../mutator/custom-client";
+import type { ErrorType as PostPostsErrorType } from "../../mutator/custom-client";
+import getPostsMutator from "../../mutator/custom-client";
+import type { ErrorType as GetPostsErrorType } from "../../mutator/custom-client";
+import patchPostsIdMutator from "../../mutator/custom-client";
+import type { ErrorType as PatchPostsIdErrorType } from "../../mutator/custom-client";
+import deletePostsIdMutator from "../../mutator/custom-client";
+import type { ErrorType as DeletePostsIdErrorType } from "../../mutator/custom-client";
+import getPostsIdMutator from "../../mutator/custom-client";
+import type { ErrorType as GetPostsIdErrorType } from "../../mutator/custom-client";
+
 /**
  * @summary Create a new post
  */
 export const postPosts = (
   createPostRequest: CreatePostRequest,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PostResponse>> => {
-  return axios.default.post(`/posts`, createPostRequest, options);
+  signal?: AbortSignal,
+) => {
+  return postPostsMutator<PostResponse>({
+    url: `/posts`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createPostRequest,
+    signal,
+  });
 };
 
 export const getPostPostsMutationOptions = <
-  TError = AxiosError<void>,
+  TError = PostPostsErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -50,7 +68,6 @@ export const getPostPostsMutationOptions = <
     { data: CreatePostRequest },
     TContext
   >;
-  axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPosts>>,
   TError,
@@ -58,13 +75,13 @@ export const getPostPostsMutationOptions = <
   TContext
 > => {
   const mutationKey = ["postPosts"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPosts>>,
@@ -72,7 +89,7 @@ export const getPostPostsMutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return postPosts(data, axiosOptions);
+    return postPosts(data);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -82,12 +99,15 @@ export type PostPostsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPosts>>
 >;
 export type PostPostsMutationBody = CreatePostRequest;
-export type PostPostsMutationError = AxiosError<void>;
+export type PostPostsMutationError = PostPostsErrorType<void>;
 
 /**
  * @summary Create a new post
  */
-export const usePostPosts = <TError = AxiosError<void>, TContext = unknown>(
+export const usePostPosts = <
+  TError = PostPostsErrorType<void>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postPosts>>,
@@ -95,7 +115,6 @@ export const usePostPosts = <TError = AxiosError<void>, TContext = unknown>(
       { data: CreatePostRequest },
       TContext
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -111,34 +130,170 @@ export const usePostPosts = <TError = AxiosError<void>, TContext = unknown>(
 /**
  * @summary Get all posts
  */
-export const getPosts = (
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PostResponse[]>> => {
-  return axios.default.get(`/posts`, options);
+export const getPosts = (signal?: AbortSignal) => {
+  return getPostsMutator<PostResponse[]>({
+    url: `/posts`,
+    method: "GET",
+    signal,
+  });
 };
 
 export const getGetPostsQueryKey = () => {
   return [`/posts`] as const;
 };
 
-export const getGetPostsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPosts>>,
-  TError = AxiosError<unknown>,
+export const getGetPostsInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getPosts>>>,
+  TError = GetPostsErrorType<unknown>,
 >(options?: {
   query?: Partial<
-    UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>
+    UseInfiniteQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>
   >;
-  axios?: AxiosRequestConfig;
 }) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetPostsQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getPosts>>> = ({
     signal,
-  }) => getPosts({ signal, ...axiosOptions });
+  }) => getPosts(signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  return {
+    queryKey,
+    queryFn,
+    retry: 3,
+    ...queryOptions,
+  } as UseInfiniteQueryOptions<
+    Awaited<ReturnType<typeof getPosts>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetPostsInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPosts>>
+>;
+export type GetPostsInfiniteQueryError = GetPostsErrorType<unknown>;
+
+export function useGetPostsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getPosts>>>,
+  TError = GetPostsErrorType<unknown>,
+>(
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPosts>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getPosts>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPostsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getPosts>>>,
+  TError = GetPostsErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPosts>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getPosts>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPostsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getPosts>>>,
+  TError = GetPostsErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPosts>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get all posts
+ */
+
+export function useGetPostsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getPosts>>>,
+  TError = GetPostsErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPosts>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetPostsInfiniteQueryOptions(options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getGetPostsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPosts>>,
+  TError = GetPostsErrorType<unknown>,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetPostsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getPosts>>> = ({
+    signal,
+  }) => getPosts(signal);
+
+  return { queryKey, queryFn, retry: 3, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getPosts>>,
     TError,
     TData
@@ -148,11 +303,11 @@ export const getGetPostsQueryOptions = <
 export type GetPostsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getPosts>>
 >;
-export type GetPostsQueryError = AxiosError<unknown>;
+export type GetPostsQueryError = GetPostsErrorType<unknown>;
 
 export function useGetPosts<
   TData = Awaited<ReturnType<typeof getPosts>>,
-  TError = AxiosError<unknown>,
+  TError = GetPostsErrorType<unknown>,
 >(
   options: {
     query: Partial<
@@ -166,7 +321,6 @@ export function useGetPosts<
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -174,7 +328,7 @@ export function useGetPosts<
 };
 export function useGetPosts<
   TData = Awaited<ReturnType<typeof getPosts>>,
-  TError = AxiosError<unknown>,
+  TError = GetPostsErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -188,7 +342,6 @@ export function useGetPosts<
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -196,13 +349,12 @@ export function useGetPosts<
 };
 export function useGetPosts<
   TData = Awaited<ReturnType<typeof getPosts>>,
-  TError = AxiosError<unknown>,
+  TError = GetPostsErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -214,13 +366,12 @@ export function useGetPosts<
 
 export function useGetPosts<
   TData = Awaited<ReturnType<typeof getPosts>>,
-  TError = AxiosError<unknown>,
+  TError = GetPostsErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -242,46 +393,49 @@ export function useGetPosts<
  * @summary Update a post by ID
  */
 export const patchPostsId = (
-  id: string,
+  id: number,
   updatePostRequest: UpdatePostRequest,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PostResponse>> => {
-  return axios.default.patch(`/posts/${id}`, updatePostRequest, options);
+) => {
+  return patchPostsIdMutator<void>({
+    url: `/posts/${id}`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updatePostRequest,
+  });
 };
 
 export const getPatchPostsIdMutationOptions = <
-  TError = AxiosError<void>,
+  TError = PatchPostsIdErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchPostsId>>,
     TError,
-    { id: string; data: UpdatePostRequest },
+    { id: number; data: UpdatePostRequest },
     TContext
   >;
-  axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof patchPostsId>>,
   TError,
-  { id: string; data: UpdatePostRequest },
+  { id: number; data: UpdatePostRequest },
   TContext
 > => {
   const mutationKey = ["patchPostsId"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof patchPostsId>>,
-    { id: string; data: UpdatePostRequest }
+    { id: number; data: UpdatePostRequest }
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return patchPostsId(id, data, axiosOptions);
+    return patchPostsId(id, data);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -291,26 +445,28 @@ export type PatchPostsIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof patchPostsId>>
 >;
 export type PatchPostsIdMutationBody = UpdatePostRequest;
-export type PatchPostsIdMutationError = AxiosError<void>;
+export type PatchPostsIdMutationError = PatchPostsIdErrorType<void>;
 
 /**
  * @summary Update a post by ID
  */
-export const usePatchPostsId = <TError = AxiosError<void>, TContext = unknown>(
+export const usePatchPostsId = <
+  TError = PatchPostsIdErrorType<void>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof patchPostsId>>,
       TError,
-      { id: string; data: UpdatePostRequest },
+      { id: number; data: UpdatePostRequest },
       TContext
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchPostsId>>,
   TError,
-  { id: string; data: UpdatePostRequest },
+  { id: number; data: UpdatePostRequest },
   TContext
 > => {
   const mutationOptions = getPatchPostsIdMutationOptions(options);
@@ -320,46 +476,42 @@ export const usePatchPostsId = <TError = AxiosError<void>, TContext = unknown>(
 /**
  * @summary Delete a post by ID
  */
-export const deletePostsId = (
-  id: string,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<void>> => {
-  return axios.default.delete(`/posts/${id}`, options);
+export const deletePostsId = (id: number) => {
+  return deletePostsIdMutator<void>({ url: `/posts/${id}`, method: "DELETE" });
 };
 
 export const getDeletePostsIdMutationOptions = <
-  TError = AxiosError<void>,
+  TError = DeletePostsIdErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deletePostsId>>,
     TError,
-    { id: string },
+    { id: number },
     TContext
   >;
-  axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deletePostsId>>,
   TError,
-  { id: string },
+  { id: number },
   TContext
 > => {
   const mutationKey = ["deletePostsId"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deletePostsId>>,
-    { id: string }
+    { id: number }
   > = (props) => {
     const { id } = props ?? {};
 
-    return deletePostsId(id, axiosOptions);
+    return deletePostsId(id);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -369,26 +521,28 @@ export type DeletePostsIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof deletePostsId>>
 >;
 
-export type DeletePostsIdMutationError = AxiosError<void>;
+export type DeletePostsIdMutationError = DeletePostsIdErrorType<void>;
 
 /**
  * @summary Delete a post by ID
  */
-export const useDeletePostsId = <TError = AxiosError<void>, TContext = unknown>(
+export const useDeletePostsId = <
+  TError = DeletePostsIdErrorType<void>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deletePostsId>>,
       TError,
-      { id: string },
+      { id: number },
       TContext
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof deletePostsId>>,
   TError,
-  { id: string },
+  { id: number },
   TContext
 > => {
   const mutationOptions = getDeletePostsIdMutationOptions(options);
@@ -398,41 +552,189 @@ export const useDeletePostsId = <TError = AxiosError<void>, TContext = unknown>(
 /**
  * @summary Get a post by ID
  */
-export const getPostsId = (
-  id: string,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PostResponse>> => {
-  return axios.default.get(`/posts/${id}`, options);
+export const getPostsId = (id: number, signal?: AbortSignal) => {
+  return getPostsIdMutator<PostResponse>({
+    url: `/posts/${id}`,
+    method: "GET",
+    signal,
+  });
 };
 
-export const getGetPostsIdQueryKey = (id: string) => {
+export const getGetPostsIdQueryKey = (id: number) => {
   return [`/posts/${id}`] as const;
 };
 
-export const getGetPostsIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = AxiosError<void>,
+export const getGetPostsIdInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof getPostsId>>>,
+  TError = GetPostsIdErrorType<void>,
 >(
-  id: string,
+  id: number,
   options?: {
     query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPostsId>>,
+        TError,
+        TData
+      >
     >;
-    axios?: AxiosRequestConfig;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetPostsIdQueryKey(id);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsId>>> = ({
     signal,
-  }) => getPostsId(id, { signal, ...axiosOptions });
+  }) => getPostsId(id, signal);
 
   return {
     queryKey,
     queryFn,
     enabled: !!id,
+    retry: 3,
+    ...queryOptions,
+  } as UseInfiniteQueryOptions<
+    Awaited<ReturnType<typeof getPostsId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetPostsIdInfiniteQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPostsId>>
+>;
+export type GetPostsIdInfiniteQueryError = GetPostsIdErrorType<void>;
+
+export function useGetPostsIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getPostsId>>>,
+  TError = GetPostsIdErrorType<void>,
+>(
+  id: number,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPostsId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPostsId>>,
+          TError,
+          Awaited<ReturnType<typeof getPostsId>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPostsIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getPostsId>>>,
+  TError = GetPostsIdErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPostsId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPostsId>>,
+          TError,
+          Awaited<ReturnType<typeof getPostsId>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPostsIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getPostsId>>>,
+  TError = GetPostsIdErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPostsId>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get a post by ID
+ */
+
+export function useGetPostsIdInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof getPostsId>>>,
+  TError = GetPostsIdErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof getPostsId>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetPostsIdInfiniteQueryOptions(id, options);
+
+  const query = useInfiniteQuery(
+    queryOptions,
+    queryClient,
+  ) as UseInfiniteQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getGetPostsIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPostsId>>,
+  TError = GetPostsIdErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetPostsIdQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsId>>> = ({
+    signal,
+  }) => getPostsId(id, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    retry: 3,
     ...queryOptions,
   } as UseQueryOptions<
     Awaited<ReturnType<typeof getPostsId>>,
@@ -444,13 +746,13 @@ export const getGetPostsIdQueryOptions = <
 export type GetPostsIdQueryResult = NonNullable<
   Awaited<ReturnType<typeof getPostsId>>
 >;
-export type GetPostsIdQueryError = AxiosError<void>;
+export type GetPostsIdQueryError = GetPostsIdErrorType<void>;
 
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = AxiosError<void>,
+  TError = GetPostsIdErrorType<void>,
 >(
-  id: string,
+  id: number,
   options: {
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>
@@ -463,7 +765,6 @@ export function useGetPostsId<
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -471,9 +772,9 @@ export function useGetPostsId<
 };
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = AxiosError<void>,
+  TError = GetPostsIdErrorType<void>,
 >(
-  id: string,
+  id: number,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>
@@ -486,7 +787,6 @@ export function useGetPostsId<
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -494,14 +794,13 @@ export function useGetPostsId<
 };
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = AxiosError<void>,
+  TError = GetPostsIdErrorType<void>,
 >(
-  id: string,
+  id: number,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -513,14 +812,13 @@ export function useGetPostsId<
 
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = AxiosError<void>,
+  TError = GetPostsIdErrorType<void>,
 >(
-  id: string,
+  id: number,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {

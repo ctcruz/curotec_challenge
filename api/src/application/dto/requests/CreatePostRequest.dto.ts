@@ -25,7 +25,7 @@ import {
  *           example: "This is the content of my first post."
  *         published:
  *           type: boolean
- *           default: false
+ *           default: true
  */
 export class CreatePostRequest {
   @IsString()

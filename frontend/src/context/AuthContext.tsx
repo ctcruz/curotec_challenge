@@ -15,7 +15,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     const loginData = await postAuthLogin({ email, password });
-    const token = loginData.data;
+    const token = loginData.token;
     console.log("token: ", token);
     if (email === "admin" && password === "123") {
       const userData = { email };

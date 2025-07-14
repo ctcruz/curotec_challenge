@@ -14,6 +14,10 @@ import type { PostResponse } from "../../model";
 export const getPostPostsResponseMock = (
   overrideResponse: Partial<PostResponse> = {},
 ): PostResponse => ({
+  id: faker.helpers.arrayElement([
+    faker.number.float({ min: undefined, max: undefined, fractionDigits: 2 }),
+    undefined,
+  ]),
   title: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
@@ -23,6 +27,14 @@ export const getPostPostsResponseMock = (
     undefined,
   ]),
   published: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  authorId: faker.helpers.arrayElement([
+    faker.number.float({ min: undefined, max: undefined, fractionDigits: 2 }),
+    undefined,
+  ]),
+  createdAt: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -31,6 +43,10 @@ export const getGetPostsResponseMock = (): PostResponse[] =>
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
   ).map(() => ({
+    id: faker.helpers.arrayElement([
+      faker.number.float({ min: undefined, max: undefined, fractionDigits: 2 }),
+      undefined,
+    ]),
     title: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
       undefined,
@@ -43,26 +59,23 @@ export const getGetPostsResponseMock = (): PostResponse[] =>
       faker.datatype.boolean(),
       undefined,
     ]),
+    authorId: faker.helpers.arrayElement([
+      faker.number.float({ min: undefined, max: undefined, fractionDigits: 2 }),
+      undefined,
+    ]),
+    createdAt: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
   }));
-
-export const getPatchPostsIdResponseMock = (
-  overrideResponse: Partial<PostResponse> = {},
-): PostResponse => ({
-  title: faker.helpers.arrayElement([
-    faker.string.alpha({ length: { min: 10, max: 20 } }),
-    undefined,
-  ]),
-  content: faker.helpers.arrayElement([
-    faker.string.alpha({ length: { min: 10, max: 20 } }),
-    undefined,
-  ]),
-  published: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-  ...overrideResponse,
-});
 
 export const getGetPostsIdResponseMock = (
   overrideResponse: Partial<PostResponse> = {},
 ): PostResponse => ({
+  id: faker.helpers.arrayElement([
+    faker.number.float({ min: undefined, max: undefined, fractionDigits: 2 }),
+    undefined,
+  ]),
   title: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
@@ -72,6 +85,14 @@ export const getGetPostsIdResponseMock = (
     undefined,
   ]),
   published: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  authorId: faker.helpers.arrayElement([
+    faker.number.float({ min: undefined, max: undefined, fractionDigits: 2 }),
+    undefined,
+  ]),
+  createdAt: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -123,24 +144,17 @@ export const getGetPostsMockHandler = (
 
 export const getPatchPostsIdMockHandler = (
   overrideResponse?:
-    | PostResponse
+    | void
     | ((
         info: Parameters<Parameters<typeof http.patch>[1]>[0],
-      ) => Promise<PostResponse> | PostResponse),
+      ) => Promise<void> | void),
 ) => {
   return http.patch("*/posts/:id", async (info) => {
     await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getPatchPostsIdResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 204 });
   });
 };
 
