@@ -15,11 +15,11 @@ app.use(express.json());
 app.use(requestLogger);
 app.use(cors());
 
-// Routes
-app.use("/auth", authRouter);
-app.use("/posts", postRouter);
-
 setupSwagger(app);
+
+// Routes
+app.use("", authRouter);
+app.use("", postRouter);
 
 // Error Handler Middleware
 app.use(errorHandler);

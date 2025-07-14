@@ -19,13 +19,13 @@ import {
  *         title:
  *           type: string
  *           minLength: 5
- *           example: "Meu primeiro post"
+ *           example: "My first post"
  *         content:
  *           type: string
- *           example: "Conteúdo do post"
+ *           example: "This is the content of my first post."
  *         published:
  *           type: boolean
- *           default: false
+ *           default: true
  */
 export class CreatePostRequest {
   @IsString()

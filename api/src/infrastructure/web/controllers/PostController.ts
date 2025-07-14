@@ -19,13 +19,19 @@ export class PostController {
   ) {}
 
   async create(req: Request, res: Response) {
-    const dto = new CreatePostRequest(req.body);
-    await validateOrReject(dto);
+    const userId = (req as any).userId;
+    const createPostRequest = new CreatePostRequest({
+      ...req.body,
+      authorId: userId,
+    });
+    await validateOrReject(createPostRequest);
 
-    const post = await this.createPostUseCase.execute(PostMapper.toDomain(dto));
+    const post = await this.createPostUseCase.execute(
+      PostMapper.toDomain(createPostRequest)
+    );
 
     const response = PostMapper.toResponse(post);
-    res.status(201).json(response);
+    return res.status(201).json(response);
   }
 
   async update(req: Request, res: Response) {
@@ -35,14 +41,14 @@ export class PostController {
 
     await this.updatePostUseCase.execute(postId, dto);
 
-    res.status(204);
+    res.sendStatus(204);
   }
 
   async delete(req: Request, res: Response) {
     const postId = parseInt(req.params.id, 10);
     await this.deletePostUseCase.execute(postId);
 
-    res.status(204);
+    res.sendStatus(204);
   }
 
   async find(req: Request, res: Response) {
