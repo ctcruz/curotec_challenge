@@ -41,14 +41,14 @@ export class PostController {
 
     await this.updatePostUseCase.execute(postId, dto);
 
-    res.status(204);
+    res.sendStatus(204);
   }
 
   async delete(req: Request, res: Response) {
     const postId = parseInt(req.params.id, 10);
     await this.deletePostUseCase.execute(postId);
 
-    res.status(204);
+    res.sendStatus(204);
   }
 
   async find(req: Request, res: Response) {

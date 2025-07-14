@@ -13,9 +13,6 @@ import type {
   UseMutationResult,
 } from "@tanstack/react-query";
 
-import * as axios from "axios";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-
 import type {
   LoginRequest,
   LoginResponse,
@@ -23,18 +20,29 @@ import type {
   UserResponse,
 } from "../../model";
 
+import postAuthRegisterMutator from "../../mutator/custom-client";
+import type { ErrorType as PostAuthRegisterErrorType } from "../../mutator/custom-client";
+import postAuthLoginMutator from "../../mutator/custom-client";
+import type { ErrorType as PostAuthLoginErrorType } from "../../mutator/custom-client";
+
 /**
  * @summary Register a new user
  */
 export const postAuthRegister = (
   registerRequest: RegisterRequest,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<UserResponse>> => {
-  return axios.default.post(`/auth/register`, registerRequest, options);
+  signal?: AbortSignal,
+) => {
+  return postAuthRegisterMutator<UserResponse>({
+    url: `/auth/register`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: registerRequest,
+    signal,
+  });
 };
 
 export const getPostAuthRegisterMutationOptions = <
-  TError = AxiosError<void>,
+  TError = PostAuthRegisterErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -43,7 +51,6 @@ export const getPostAuthRegisterMutationOptions = <
     { data: RegisterRequest },
     TContext
   >;
-  axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postAuthRegister>>,
   TError,
@@ -51,13 +58,13 @@ export const getPostAuthRegisterMutationOptions = <
   TContext
 > => {
   const mutationKey = ["postAuthRegister"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postAuthRegister>>,
@@ -65,7 +72,7 @@ export const getPostAuthRegisterMutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return postAuthRegister(data, axiosOptions);
+    return postAuthRegister(data);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -75,13 +82,13 @@ export type PostAuthRegisterMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthRegister>>
 >;
 export type PostAuthRegisterMutationBody = RegisterRequest;
-export type PostAuthRegisterMutationError = AxiosError<void>;
+export type PostAuthRegisterMutationError = PostAuthRegisterErrorType<void>;
 
 /**
  * @summary Register a new user
  */
 export const usePostAuthRegister = <
-  TError = AxiosError<void>,
+  TError = PostAuthRegisterErrorType<void>,
   TContext = unknown,
 >(
   options?: {
@@ -91,7 +98,6 @@ export const usePostAuthRegister = <
       { data: RegisterRequest },
       TContext
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -109,13 +115,19 @@ export const usePostAuthRegister = <
  */
 export const postAuthLogin = (
   loginRequest: LoginRequest,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<LoginResponse>> => {
-  return axios.default.post(`/auth/login`, loginRequest, options);
+  signal?: AbortSignal,
+) => {
+  return postAuthLoginMutator<LoginResponse>({
+    url: `/auth/login`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: loginRequest,
+    signal,
+  });
 };
 
 export const getPostAuthLoginMutationOptions = <
-  TError = AxiosError<void>,
+  TError = PostAuthLoginErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -124,7 +136,6 @@ export const getPostAuthLoginMutationOptions = <
     { data: LoginRequest },
     TContext
   >;
-  axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postAuthLogin>>,
   TError,
@@ -132,13 +143,13 @@ export const getPostAuthLoginMutationOptions = <
   TContext
 > => {
   const mutationKey = ["postAuthLogin"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postAuthLogin>>,
@@ -146,7 +157,7 @@ export const getPostAuthLoginMutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return postAuthLogin(data, axiosOptions);
+    return postAuthLogin(data);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -156,12 +167,15 @@ export type PostAuthLoginMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthLogin>>
 >;
 export type PostAuthLoginMutationBody = LoginRequest;
-export type PostAuthLoginMutationError = AxiosError<void>;
+export type PostAuthLoginMutationError = PostAuthLoginErrorType<void>;
 
 /**
  * @summary Login an user
  */
-export const usePostAuthLogin = <TError = AxiosError<void>, TContext = unknown>(
+export const usePostAuthLogin = <
+  TError = PostAuthLoginErrorType<void>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postAuthLogin>>,
@@ -169,7 +183,6 @@ export const usePostAuthLogin = <TError = AxiosError<void>, TContext = unknown>(
       { data: LoginRequest },
       TContext
     >;
-    axios?: AxiosRequestConfig;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<

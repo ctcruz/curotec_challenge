@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import type { User } from "../types/auth";
 import { AuthContext } from "./useAuth";
 import { postAuthLogin } from "../api";
+import api from "../services/axios";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -15,14 +16,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     const loginData = await postAuthLogin({ email, password });
-    const token = loginData.data;
-    console.log("token: ", token);
-    if (email === "admin" && password === "123") {
+    const tokenData = loginData.token;
+
+    if (tokenData) {
+      api.defaults.headers.common["Authorization"] = `Bearer ${tokenData}`;
+      localStorage.setItem("token", tokenData);
+
       const userData = { email };
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
     } else {
-      throw new Error("Credenciais inválidas");
+      throw new Error("Invalid credentials");
     }
   };
 

@@ -76,7 +76,7 @@ router.post(
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: number
  *         required: true
  *         description: Post ID
  *     requestBody:
@@ -86,12 +86,8 @@ router.post(
  *           schema:
  *             $ref: '#/components/schemas/UpdatePostRequest'
  *     responses:
- *       200:
+ *       204:
  *         description: Post updated
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/PostResponse'
  *       404:
  *         description: Post not found
  */
@@ -112,7 +108,7 @@ router.patch(
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: number
  *         required: true
  *         description: Post ID
  *     responses:
@@ -138,7 +134,7 @@ router.delete(
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: number
  *         required: true
  *         description: Post ID
  *     responses:

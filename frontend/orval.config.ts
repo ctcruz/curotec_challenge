@@ -14,6 +14,17 @@ export default defineConfig({
       client: "react-query",
       tsconfig: "./tsconfig.json",
       packageJson: "./package.json",
+      override: {
+        mutator: "mutator/custom-client.ts",
+        query: {
+          useQuery: true,
+          useInfinite: true,
+          options: {
+            retry: 3,
+          },
+          signal: true,
+        },
+      },
     },
     input: {
       target: "http://127.0.0.1:3000/api-json",
