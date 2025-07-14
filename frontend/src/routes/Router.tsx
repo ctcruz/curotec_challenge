@@ -1,21 +1,20 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-// import { ProtectedRoute } from "./ProtectedRoute";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 const Dashboard = React.lazy(() => import("../pages/Dashboard"));
 const Login = React.lazy(() => import("../pages/Login"));
 
 export const AppRouter = () => (
   <Routes>
-    <Route path="/" element={<Dashboard />} />
     <Route path="/login" element={<Login />} />
-    {/* <Route
+    <Route
       path="/"
       element={
         <ProtectedRoute>
           <Dashboard />
         </ProtectedRoute>
       }
-    /> */}
+    />
   </Routes>
 );

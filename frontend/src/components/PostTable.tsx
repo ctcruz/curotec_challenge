@@ -35,12 +35,6 @@ export const PostTable: React.FC<PostTableProps> = ({ posts, onDelete }) => {
       width: 160,
     },
     {
-      field: "published",
-      headerName: "Status",
-      width: 120,
-      renderCell: (params) => (params.value ? "Published" : "Draft"),
-    },
-    {
       field: "actions",
       headerName: "Actions",
       width: 120,
