@@ -22,7 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
     } else {
-      throw new Error("Credenciais inválidas");
+      throw new Error("Invalid credentials");
     }
   };
 

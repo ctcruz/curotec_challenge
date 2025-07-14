@@ -13,8 +13,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const editPostSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  content: z.string().min(1, "Content is required"),
+  title: z.string().trim().min(1, "Title is required"),
+  content: z.string().trim().min(1, "Content is required"),
 });
 
 type EditPostForm = z.infer<typeof editPostSchema>;
@@ -55,14 +55,14 @@ export const EditPostDialog: React.FC = () => {
   return (
     <Dialog open={!!editingPost} onClose={() => setEditingPost(null)}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <DialogTitle>Editar Post</DialogTitle>
+        <DialogTitle>Edit Post</DialogTitle>
         <DialogContent>
           <Controller
             name="title"
             control={control}
             render={({ field }) => (
               <TextField
-                label="Título"
+                label="Title"
                 fullWidth
                 margin="normal"
                 {...field}
@@ -76,7 +76,7 @@ export const EditPostDialog: React.FC = () => {
             control={control}
             render={({ field }) => (
               <TextField
-                label="Conteúdo"
+                label="Content"
                 fullWidth
                 margin="normal"
                 {...field}
@@ -87,9 +87,9 @@ export const EditPostDialog: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditingPost(null)}>Cancelar</Button>
+          <Button onClick={() => setEditingPost(null)}>Cancel</Button>
           <Button type="submit" variant="contained">
-            Salvar
+            Save
           </Button>
         </DialogActions>
       </form>

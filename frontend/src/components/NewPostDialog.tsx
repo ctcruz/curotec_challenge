@@ -13,10 +13,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Post } from "./PostTable";
 
-// Schema de validação com zod
 const newPostSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  content: z.string().min(1, "Content is required"),
+  title: z.string().trim().min(1, "Title is required"),
+  content: z.string().trim().min(1, "Content is required"),
 });
 
 type NewPostForm = z.infer<typeof newPostSchema>;
@@ -51,14 +50,14 @@ export const NewPostDialog: React.FC = () => {
   return (
     <Dialog open={creating} onClose={() => setCreating(false)}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <DialogTitle>Novo Post</DialogTitle>
+        <DialogTitle>New Post</DialogTitle>
         <DialogContent>
           <Controller
             name="title"
             control={control}
             render={({ field }) => (
               <TextField
-                label="Título"
+                label="Title"
                 fullWidth
                 margin="normal"
                 {...field}
@@ -72,7 +71,7 @@ export const NewPostDialog: React.FC = () => {
             control={control}
             render={({ field }) => (
               <TextField
-                label="Conteúdo"
+                label="Content"
                 fullWidth
                 margin="normal"
                 {...field}
@@ -83,9 +82,9 @@ export const NewPostDialog: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreating(false)}>Cancelar</Button>
+          <Button onClick={() => setCreating(false)}>Cancel</Button>
           <Button type="submit" variant="contained">
-            Criar
+            Create
           </Button>
         </DialogActions>
       </form>
