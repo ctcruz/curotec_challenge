@@ -7,7 +7,7 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  // Tratamento para erros conhecidos (AppError)
+  // Handling for known errors (AppError)
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       error: err.message,
@@ -16,8 +16,8 @@ export function errorHandler(
     return;
   }
 
+  // Class-validator errors
   if (Array.isArray(err) && err[0]?.constraints) {
-    // Erros do class-validator
     res.status(422).json({
       error: "Validation error",
       details: err.map((e) => ({
@@ -28,7 +28,7 @@ export function errorHandler(
     return;
   }
 
-  // Erros inesperados (500)
+  // Unexpected errors (500)
   console.error("[Global Error]", err);
   res.status(500).json({
     error: "Internal server error",

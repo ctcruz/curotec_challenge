@@ -10,16 +10,21 @@ import { UpdatePostUseCase } from "../../../core/usecases/UpdatePostUseCase";
 import { DeletePostUseCase } from "../../../core/usecases/DeletePostUseCase";
 import { FindPostUseCase } from "../../../core/usecases/FindPostUseCase";
 import { FindAllPostUseCase } from "../../../core/usecases/FindAllPostUseCase";
+import { PrismaUserRepository } from "../../repositories/PrismaUserRepository";
 
 const prisma = new PrismaClient();
 
 // Dependency Injection
+const userRepository = new PrismaUserRepository(prisma);
 const postRepository = new PrismaPostRepository(prisma);
 const createPostUseCase = new CreatePostUseCase(postRepository);
 const updatePostUseCase = new UpdatePostUseCase(postRepository);
 const deletePostUseCase = new DeletePostUseCase(postRepository);
 const findPostUseCase = new FindPostUseCase(postRepository);
-const findAllPostUseCase = new FindAllPostUseCase(postRepository);
+const findAllPostUseCase = new FindAllPostUseCase(
+  postRepository,
+  userRepository
+);
 
 const authService = new JwtAuthService(process.env.JWT_SECRET!);
 const postController = new PostController(

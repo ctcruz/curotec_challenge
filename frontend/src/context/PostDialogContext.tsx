@@ -12,6 +12,8 @@ import { deletePostsId, patchPostsId, postPosts } from "../api";
 interface PostDialogContextType {
   editingPost: Post | null;
   setEditingPost: (post: Post | null) => void;
+  viewingPost: Post | null;
+  setViewingPost: (post: Post | null) => void;
   creating: boolean;
   setCreating: (creating: boolean) => void;
   handleUpdate: (updatedPost: Post) => void;
@@ -36,6 +38,7 @@ export const usePostDialogContext = () => {
 
 export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [viewingPost, setViewingPost] = useState<Post | null>(null);
   const [creating, setCreating] = useState(false);
   const [refetch, setRefetchState] = useState<() => void>(() => () => {});
   const setRefetch = (fn: () => void) => setRefetchState(() => fn);
@@ -50,7 +53,7 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
         .then(() => {
           Swal.fire({
             title: "Success!",
-            text: "Post updated successfully!",
+            text: "Post has been updated.",
             icon: "success",
             confirmButtonText: "Ok!",
           });
@@ -70,24 +73,36 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
 
   const handleDelete = useCallback(
     (postId: number) => {
-      deletePostsId(postId)
-        .then(() => {
-          Swal.fire({
-            title: "Success!",
-            text: "Post deleted successfully!",
-            icon: "success",
-            confirmButtonText: "Ok!",
-          });
-          refetch();
-        })
-        .catch(() => {
-          Swal.fire({
-            title: "Ops!",
-            text: "Something went wrong, please try again!",
-            icon: "error",
-            confirmButtonText: "Ok!",
-          });
-        });
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        confirmButtonColor: "#1976d2",
+        cancelButtonText: "No, cancel!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          deletePostsId(postId)
+            .then(() => {
+              Swal.fire({
+                title: "Deleted!",
+                text: "Post has been deleted.",
+                icon: "success",
+                confirmButtonText: "Ok!",
+              });
+              refetch();
+            })
+            .catch(() => {
+              Swal.fire({
+                title: "Ops!",
+                text: "Something went wrong, please try again.",
+                icon: "error",
+                confirmButtonText: "Ok!",
+              });
+            });
+        }
+      });
     },
     [refetch]
   );
@@ -97,11 +112,12 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
       postPosts({
         title: newPost.title,
         content: newPost.content,
+        published: newPost.published,
       })
         .then(() => {
           Swal.fire({
             title: "Success!",
-            text: "Post created successfully!",
+            text: "Post has been created.",
             icon: "success",
             confirmButtonText: "Ok!",
           });
@@ -126,6 +142,8 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
         setEditingPost,
         creating,
         setCreating,
+        viewingPost,
+        setViewingPost,
         handleUpdate,
         handleDelete,
         handleCreate,

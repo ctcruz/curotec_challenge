@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { RegisterUseCase } from "../../../core/usecases/RegisterUseCase";
 import { LoginUseCase } from "../../../core/usecases/LoginUseCase";
+import { UserMapper } from "../../../application/mappers/UserMapper";
+import { validateOrReject } from "class-validator";
+import { RegisterRequest } from "../../../application/dto/requests/RegisterRequest.dto";
 
 export class AuthController {
   constructor(
@@ -15,12 +18,13 @@ export class AuthController {
   }
 
   async register(req: Request, res: Response) {
-    const { name, email, password } = req.body;
-    const user = await this.registerUseCase.execute(name, email, password);
-    res.status(201).json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    });
+    const createUserRequest = new RegisterRequest(req.body);
+    await validateOrReject(createUserRequest);
+
+    const user = UserMapper.toDomain(createUserRequest);
+    const userRegistered = await this.registerUseCase.execute(user);
+
+    const response = UserMapper.toResponse(userRegistered);
+    res.status(200).json(response);
   }
 }

@@ -5,17 +5,20 @@ import { PrismaClient } from "../../generated/prisma";
 export class PrismaUserRepository implements UserRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async findById(id: number): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) return null;
+    return user;
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
     if (!user) return null;
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      password: user.password, // Ensure password is hashed before saving
-    };
+    return user;
   }
 
   async create(user: Omit<User, "id">): Promise<User> {
@@ -23,14 +26,9 @@ export class PrismaUserRepository implements UserRepository {
       data: {
         name: user.name,
         email: user.email,
-        password: user.password, // Ensure password is hashed before saving
+        password: user.password,
       },
     });
-    return {
-      id: createdUser.id,
-      name: createdUser.name,
-      email: createdUser.email,
-      password: user.password,
-    };
+    return createdUser;
   }
 }

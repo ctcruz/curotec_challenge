@@ -5,6 +5,7 @@ import {
 } from "@mui/x-data-grid";
 import { Box, Typography, IconButton, Button, Stack } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import ViewIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { usePostDialogContext } from "../context/PostDialogContext";
@@ -14,7 +15,6 @@ export interface Post {
   title: string;
   content: string;
   published: boolean;
-  author: string;
   publishedAt: string;
 }
 
@@ -24,11 +24,18 @@ interface PostTableProps {
 }
 
 export const PostTable: React.FC<PostTableProps> = ({ posts, onDelete }) => {
-  const { setEditingPost, setCreating } = usePostDialogContext();
+  const { setEditingPost, setCreating, setViewingPost } =
+    usePostDialogContext();
 
   const columns: GridColDef[] = [
     { field: "title", headerName: "Title", flex: 1 },
-    { field: "author", headerName: "Author", width: 150 },
+    {
+      field: "published",
+      headerName: "Status",
+      width: 160,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Published" : "Draft",
+    },
     {
       field: "publishedAt",
       headerName: "Published Date",
@@ -37,10 +44,16 @@ export const PostTable: React.FC<PostTableProps> = ({ posts, onDelete }) => {
     {
       field: "actions",
       headerName: "Actions",
-      width: 120,
+      width: 160,
       sortable: false,
       renderCell: (params: GridRenderCellParams) => (
         <>
+          <IconButton
+            aria-label="view"
+            onClick={() => setViewingPost(params.row)}
+          >
+            <ViewIcon />
+          </IconButton>
           <IconButton
             aria-label="edit"
             onClick={() => setEditingPost(params.row)}
@@ -71,7 +84,12 @@ export const PostTable: React.FC<PostTableProps> = ({ posts, onDelete }) => {
         </Button>
       </Stack>
 
-      <DataGrid rows={posts} columns={columns} disableRowSelectionOnClick />
+      <DataGrid
+        rows={posts}
+        columns={columns}
+        disableRowSelectionOnClick
+        hideFooter
+      />
     </Box>
   );
 };

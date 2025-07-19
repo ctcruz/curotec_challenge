@@ -9,6 +9,7 @@ import {
 } from "../context/PostDialogContext";
 import { EditPostDialog } from "../components/EditPostDialog";
 import { NewPostDialog } from "../components/NewPostDialog";
+import { ViewPostDialog } from "../components/ViewPostDialog";
 
 function DashboardContent() {
   const { data: dataPosts, refetch } = useGetPosts();
@@ -36,6 +37,7 @@ function DashboardContent() {
       <PostTable posts={posts} onDelete={handleDelete} />
       <EditPostDialog />
       <NewPostDialog />
+      <ViewPostDialog />
     </>
   );
 }

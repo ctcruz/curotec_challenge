@@ -65,9 +65,21 @@ export class PostController {
   }
 
   async findAll(req: Request, res: Response) {
-    const posts = await this.findAllPostUseCase.execute();
+    const userId = Number((req as any).userId);
 
-    const response = posts.map(PostMapper.toResponse);
-    res.status(200).json(response);
+    try {
+      const posts = await this.findAllPostUseCase.execute({ authorId: 3 });
+      const response = posts.map(PostMapper.toResponse);
+      res.status(200).json(response);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      res.status(500).json({ error: errorMessage });
+      return;
+    }
+    // const posts = await this.findAllPostUseCase.execute({ authorId: 3 });
+
+    // const response = posts.map(PostMapper.toResponse);
+    // res.status(200).json(response);
   }
 }

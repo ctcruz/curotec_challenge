@@ -27,7 +27,7 @@ export default defineConfig({
       },
     },
     input: {
-      target: "http://127.0.0.1:3000/api-json",
+      target: "http://127.0.0.1:8080/api-json",
     },
   },
 });

@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail } from "class-validator";
+import { IsString, IsNotEmpty, IsEmail, MinLength } from "class-validator";
 
 /**
  * @swagger
@@ -13,24 +13,27 @@ import { IsString, IsNotEmpty, IsEmail } from "class-validator";
  *       properties:
  *         name:
  *           type: string
+ *           minLength: 2
  *           example: "John Doe"
  *         email:
  *           type: string
- *           example: "john.doe@email.com"
+ *           example: "john.due@email.com"
  *         password:
  *           type: string
+ *           minLength: 6
  */
 export class RegisterRequest {
   @IsString()
+  @MinLength(2, { message: "Name must be at least 2 characters long" })
   @IsNotEmpty()
   name: string;
 
   @IsString()
   @IsEmail()
-  @IsNotEmpty()
   email: string;
 
   @IsString()
+  @MinLength(6, { message: "Password must be at least 6 characters long" })
   @IsNotEmpty()
   password: string;
 

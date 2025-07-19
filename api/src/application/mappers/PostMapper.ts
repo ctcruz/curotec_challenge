@@ -8,7 +8,7 @@ export class PostMapper {
     return {
       title: dto.title,
       content: dto.content,
-      published: dto.published || false,
+      published: dto.published ?? true,
       authorId: dto.authorId,
     };
   }

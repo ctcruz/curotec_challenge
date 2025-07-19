@@ -1,13 +1,14 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "main": "src/main.js",
+  "main": "src/main.ts",
   "engines": {
     "node": "v20.19.3"
   },
   "scripts": {
     "start": "ts-node-dev src/main.ts",
     "swagger": "node swagger.js",
+    "db:deploy": "npx prisma migrate deploy && npx prisma generate",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:integration": "jest --testPathPattern=integration",

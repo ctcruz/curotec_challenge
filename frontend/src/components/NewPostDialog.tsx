@@ -6,6 +6,10 @@ import {
   DialogActions,
   Button,
   TextField,
+  FormControl,
+  FormGroup,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { usePostDialogContext } from "../context/PostDialogContext";
 import { useForm, Controller } from "react-hook-form";
@@ -16,6 +20,7 @@ import type { Post } from "./PostTable";
 const newPostSchema = z.object({
   title: z.string().trim().min(1, "Title is required"),
   content: z.string().trim().min(1, "Content is required"),
+  published: z.boolean().optional(),
 });
 
 type NewPostForm = z.infer<typeof newPostSchema>;
@@ -34,6 +39,7 @@ export const NewPostDialog: React.FC = () => {
     defaultValues: {
       title: "",
       content: "",
+      published: true,
     },
   });
 
@@ -48,7 +54,7 @@ export const NewPostDialog: React.FC = () => {
   };
 
   return (
-    <Dialog open={creating} onClose={() => setCreating(false)}>
+    <Dialog open={creating} onClose={() => setCreating(false)} fullWidth>
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <DialogTitle>New Post</DialogTitle>
         <DialogContent>
@@ -78,6 +84,20 @@ export const NewPostDialog: React.FC = () => {
                 error={!!errors.content}
                 helperText={errors.content?.message}
               />
+            )}
+          />
+          <Controller
+            name="published"
+            control={control}
+            render={({ field }) => (
+              <FormControl component="fieldset" variant="outlined">
+                <FormGroup>
+                  <FormControlLabel
+                    control={<Switch {...field} defaultChecked />}
+                    label={field.value ? "Published" : "Draft"}
+                  />
+                </FormGroup>
+              </FormControl>
             )}
           />
         </DialogContent>

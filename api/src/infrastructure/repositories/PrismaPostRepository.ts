@@ -1,12 +1,18 @@
-import { PostRepository } from "../../core/interfaces/repositories/PostRepository";
+import {
+  FindAllPostParams,
+  PostRepository,
+} from "../../core/interfaces/repositories/PostRepository";
 import { Post } from "../../core/entities/post.entity";
 import { PrismaClient } from "../../generated/prisma";
 
 export class PrismaPostRepository implements PostRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findAll(): Promise<Post[]> {
-    return this.prisma.post.findMany();
+  async findAll({ authorId }: FindAllPostParams): Promise<Post[]> {
+    return this.prisma.post.findMany({
+      orderBy: { createdAt: "desc" },
+      where: { authorId },
+    });
   }
 
   async update(id: number, post: Partial<Post>): Promise<Post> {
