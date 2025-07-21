@@ -45,8 +45,11 @@ const Login: React.FC = () => {
     try {
       await login(data.email, data.password);
       navigate("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      setServerError(err.message || "Error logging in. Please try again.");
+      setServerError(
+        err.response.data.error || "Error logging in. Please try again."
+      );
     }
   };
 

@@ -24,14 +24,22 @@ export class PostController {
       ...req.body,
       authorId: userId,
     });
+
     await validateOrReject(createPostRequest);
 
-    const post = await this.createPostUseCase.execute(
-      PostMapper.toDomain(createPostRequest)
-    );
+    try {
+      const post = await this.createPostUseCase.execute(
+        PostMapper.toDomain(createPostRequest)
+      );
 
-    const response = PostMapper.toResponse(post);
-    return res.status(201).json(response);
+      const response = PostMapper.toResponse(post);
+      return res.status(201).json(response);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      res.status(500).json({ error: errorMessage });
+      return;
+    }
   }
 
   async update(req: Request, res: Response) {
@@ -39,29 +47,51 @@ export class PostController {
     const dto = new UpdatePostRequest(req.body);
     await validateOrReject(dto);
 
-    await this.updatePostUseCase.execute(postId, dto);
+    try {
+      await this.updatePostUseCase.execute(postId, dto);
 
-    res.sendStatus(204);
+      return res.sendStatus(204);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      res.status(500).json({ error: errorMessage });
+      return;
+    }
   }
 
   async delete(req: Request, res: Response) {
     const postId = Number(req.params.id);
-    await this.deletePostUseCase.execute(postId);
+    try {
+      await this.deletePostUseCase.execute(postId);
 
-    res.sendStatus(204);
+      res.sendStatus(204);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      res.status(500).json({ error: errorMessage });
+      return;
+    }
   }
 
   async find(req: Request, res: Response) {
     const postId = Number(req.params.id);
-    const post = await this.findPostUseCase.execute(postId);
 
-    if (post === null) {
-      res.status(404).json({ error: "Post not found" });
+    try {
+      const post = await this.findPostUseCase.execute(postId);
+
+      if (post === null) {
+        res.status(404).json({ error: "Post not found" });
+        return;
+      }
+
+      const response = PostMapper.toResponse(post);
+      res.status(200).json(response);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      res.status(500).json({ error: errorMessage });
       return;
     }
-
-    const response = PostMapper.toResponse(post);
-    res.status(200).json(response);
   }
 
   async findAll(req: Request, res: Response) {

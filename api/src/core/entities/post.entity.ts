@@ -3,6 +3,6 @@ export interface Post {
   title: string;
   content: string;
   published: boolean;
-  authorId: number; // todo - change to author object
+  authorId: number;
   createdAt?: Date;
 }
