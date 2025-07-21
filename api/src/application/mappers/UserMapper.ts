@@ -1,10 +1,10 @@
 import { User } from "../../core/entities/user.entity";
-import { CreateUserRequest } from "../dto/requests/CreateUserRequest.dto";
+import { RegisterRequest } from "../dto/requests/RegisterRequest.dto";
 import { UserResponse } from "../dto/responses/UserResponse.dto";
 
 export class UserMapper {
   // Convert request DTO to domain entity
-  static toDomain(dto: CreateUserRequest): User {
+  static toDomain(dto: RegisterRequest): User {
     return {
       name: dto.name,
       email: dto.email,

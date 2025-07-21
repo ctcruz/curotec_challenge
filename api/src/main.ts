@@ -18,8 +18,8 @@ app.use(cors());
 setupSwagger(app);
 
 // Routes
-app.use("", authRouter);
-app.use("", postRouter);
+app.use("/api", authRouter);
+app.use("/api", postRouter);
 
 // Error Handler Middleware
 app.use(errorHandler);

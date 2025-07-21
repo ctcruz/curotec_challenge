@@ -35,7 +35,7 @@ export class PostController {
   }
 
   async update(req: Request, res: Response) {
-    const postId = parseInt(req.params.id, 10);
+    const postId = Number(req.params.id);
     const dto = new UpdatePostRequest(req.body);
     await validateOrReject(dto);
 
@@ -45,14 +45,14 @@ export class PostController {
   }
 
   async delete(req: Request, res: Response) {
-    const postId = parseInt(req.params.id, 10);
+    const postId = Number(req.params.id);
     await this.deletePostUseCase.execute(postId);
 
     res.sendStatus(204);
   }
 
   async find(req: Request, res: Response) {
-    const postId = parseInt(req.params.id, 10);
+    const postId = Number(req.params.id);
     const post = await this.findPostUseCase.execute(postId);
 
     if (post === null) {
@@ -68,7 +68,7 @@ export class PostController {
     const userId = Number((req as any).userId);
 
     try {
-      const posts = await this.findAllPostUseCase.execute({ authorId: 3 });
+      const posts = await this.findAllPostUseCase.execute({ authorId: userId });
       const response = posts.map(PostMapper.toResponse);
       res.status(200).json(response);
     } catch (error) {
@@ -77,9 +77,5 @@ export class PostController {
       res.status(500).json({ error: errorMessage });
       return;
     }
-    // const posts = await this.findAllPostUseCase.execute({ authorId: 3 });
-
-    // const response = posts.map(PostMapper.toResponse);
-    // res.status(200).json(response);
   }
 }

@@ -15,13 +15,16 @@ import {
  *       required:
  *         - title
  *         - content
+ *         - published
  *       properties:
  *         title:
  *           type: string
- *           minLength: 5
+ *           minLength: 1
  *           example: "My first post"
  *         content:
  *           type: string
+ *           minLength: 1
+ *           description: "Content of the post"
  *           example: "This is the content of my first post."
  *         published:
  *           type: boolean

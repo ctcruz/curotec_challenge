@@ -96,7 +96,6 @@ const Login: React.FC = () => {
                 {...field}
                 error={!!errors.password}
                 helperText={errors.password?.message}
-                autoComplete="current-password"
               />
             )}
           />

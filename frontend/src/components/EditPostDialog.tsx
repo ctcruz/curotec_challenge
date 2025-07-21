@@ -82,6 +82,8 @@ export const EditPostDialog: React.FC = () => {
                 fullWidth
                 margin="normal"
                 {...field}
+                multiline
+                rows={3}
                 error={!!errors.content}
                 helperText={errors.content?.message}
               />

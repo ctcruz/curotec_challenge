@@ -55,6 +55,7 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
             title: "Success!",
             text: "Post has been updated.",
             icon: "success",
+            confirmButtonColor: "#1976d2",
             confirmButtonText: "Ok!",
           });
           refetch();
@@ -64,6 +65,7 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
             title: "Ops!",
             text: "Something went wrong, please try again!",
             icon: "error",
+            confirmButtonColor: "#1976d2",
             confirmButtonText: "Ok!",
           });
         });
@@ -89,6 +91,7 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
                 title: "Deleted!",
                 text: "Post has been deleted.",
                 icon: "success",
+                confirmButtonColor: "#1976d2",
                 confirmButtonText: "Ok!",
               });
               refetch();
@@ -98,6 +101,7 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
                 title: "Ops!",
                 text: "Something went wrong, please try again.",
                 icon: "error",
+                confirmButtonColor: "#1976d2",
                 confirmButtonText: "Ok!",
               });
             });
@@ -119,6 +123,7 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
             title: "Success!",
             text: "Post has been created.",
             icon: "success",
+            confirmButtonColor: "#1976d2",
             confirmButtonText: "Ok!",
           });
           refetch();
@@ -128,6 +133,7 @@ export const PostDialogProvider = ({ children }: { children: ReactNode }) => {
             title: "Ops!",
             text: "Something went wrong, please try again!",
             icon: "error",
+            confirmButtonColor: "#1976d2",
             confirmButtonText: "Ok!",
           });
         });

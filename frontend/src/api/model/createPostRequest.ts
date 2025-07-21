@@ -7,8 +7,12 @@
  */
 
 export interface CreatePostRequest {
-  /** @minLength 5 */
+  /** @minLength 1 */
   title: string;
+  /**
+   * Content of the post
+   * @minLength 1
+   */
   content: string;
-  published?: boolean;
+  published: boolean;
 }
